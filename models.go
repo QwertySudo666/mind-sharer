@@ -10,7 +10,7 @@ type user struct {
 	Email    string    `json:"email"`
 	Username string    `json:"username"`
 	Password string    `json:"password"`
-	Posts    []post    `json:"posts"`
+	//Posts    []post    `json:"posts"`
 }
 
 type post struct {

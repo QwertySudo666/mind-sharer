@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	//"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
-	"strconv"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func fetchUsers() ([]user, error) {
@@ -41,22 +43,12 @@ func fetchUserById(id uuid.UUID) (user, error) {
 	return existedUser, nil
 }
 
-func persistUser(user user) (persistedUUID uuid.UUID, err error) {
-	result, err := db.Exec("INSERT INTO users (Id, Email, Username, Password) VALUES (?, ?, ?, ?)",
-		user.Id, user.Email, user.Username, user.Password)
-
-	a, _ := result.LastInsertId()
-	b, _ := result.RowsAffected()
-
-	fmt.Println("%v", a)
-	fmt.Println("%v", b)
-	if err != nil {
-		return persistedUUID, fmt.Errorf("%v", err)
-	}
-	id, err := result.LastInsertId()
-	persistedUUID = uuid.MustParse(strconv.FormatInt(id, 10))
-	if err != nil {
-		return persistedUUID, fmt.Errorf("%v", err)
-	}
-	return persistedUUID, nil
+func persistUser(newUser user) (user, error) {
+	dsn := "root:localhost@tcp(127.0.0.1:3306)/mind_sharer?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db.Create(&newUser)
+	//if err != nil {
+	//	return &user{}, fmt.Errorf("%v", err)
+	//}
+	return newUser, err
 }

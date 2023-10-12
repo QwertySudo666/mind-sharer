@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func configureUsersRouter() {
@@ -18,7 +21,15 @@ func configureUsersRouter() {
 }
 
 func getUsers(ctx *gin.Context) {
-	users, _ := fetchUsers()
+	var users []user
+	dsn := "root:localhost@tcp(127.0.0.1:3306)/mind_sharer?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
+	result := db.Find(&users)
+	fmt.Println(result.RowsAffected) // returns found records count, equals `len(users)`
+	fmt.Println(result.Error)        // returns error
 	ctx.IndentedJSON(200, users)
 }
 
@@ -30,9 +41,13 @@ func fetchUser(ctx *gin.Context) {
 
 func saveUser(ctx *gin.Context) {
 	var newUser user
+	fmt.Println(newUser)
 	if err := ctx.BindJSON(&newUser); err != nil {
+		fmt.Println("%v", err)
 		return
 	}
-	id, _ := persistUser(newUser)
-	ctx.IndentedJSON(200, id)
+	fmt.Println(newUser)
+
+	persistedUser, _ := persistUser(newUser)
+	ctx.IndentedJSON(200, persistedUser)
 }

@@ -1,8 +1,13 @@
 package main
 
+import "mind-sharer/api"
+
 func main() {
-	configureMySQLDatabase()
-	configureUsersRouter()
+	api.Main()
+	//config.ConfigureMySQLDatabase()
+	//config.ConfigureGromMySQLConnection()
+	//configureUsersRouter()
+	//Web.ConfigureUsersRouter()
 }
 
 //func fetchUsers(context *gin.Context) {
