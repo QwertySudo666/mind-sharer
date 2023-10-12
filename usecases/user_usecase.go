@@ -2,31 +2,38 @@ package usecases
 
 import (
 	"github.com/google/uuid"
-	"mind-sharer/domain"
+	"mind-sharer/domain/adapter"
+	"mind-sharer/domain/models"
 )
 
-type UserRepository interface {
-	Create(user domain.User) (uuid.UUID, error)
-	GetByID(id uuid.UUID) (domain.User, error)
-	// Add other methods as needed
-}
-
 type UserUseCase struct {
-	userRepo UserRepository
+	userRepo adapter.UserRepository
 }
 
-func NewUserUseCase(repo UserRepository) *UserUseCase {
+func NewUserUseCase(repo adapter.UserRepository) *UserUseCase {
 	return &UserUseCase{
 		userRepo: repo,
 	}
 }
 
-func (uc *UserUseCase) RegisterUser(user domain.User) (uuid.UUID, error) {
-	// Add validation and business logic here
-	// e.g., password hashing, validation checks, etc.
-	return uc.userRepo.Create(user)
+func (uc *UserUseCase) SearchUsers() ([]models.User, error) {
+	return uc.userRepo.SearchUsers()
 }
 
-func (uc *UserUseCase) GetUserByID(id uuid.UUID) (domain.User, error) {
-	return uc.userRepo.GetByID(id)
+func (uc *UserUseCase) GetUserByID(id uuid.UUID) (models.User, error) {
+	return uc.userRepo.FetchUserById(id)
+}
+
+func (uc *UserUseCase) RegisterUser(user models.User) (models.User, error) {
+	// Add validation and business logic here
+	// e.g., password hashing, validation checks, etc.
+	return uc.userRepo.CreateUser(user)
+}
+
+func (uc *UserUseCase) UpdateUser(user models.User) (models.User, error) {
+	return uc.userRepo.UpdateUser(user)
+}
+
+func (uc *UserUseCase) DeleteUser(id uuid.UUID) (models.User, error) {
+	return uc.userRepo.DeleteUser(id)
 }

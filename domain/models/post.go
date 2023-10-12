@@ -1,17 +1,9 @@
-package main
+package models
 
 import (
 	"github.com/google/uuid"
 	"time"
 )
-
-type user struct {
-	Id       uuid.UUID `json:"id"`
-	Email    string    `json:"email"`
-	Username string    `json:"username"`
-	Password string    `json:"password"`
-	//Posts    []post    `json:"posts"`
-}
 
 type post struct {
 	Id          uuid.UUID `json:"id,"`
