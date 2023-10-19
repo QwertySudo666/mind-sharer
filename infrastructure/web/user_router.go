@@ -1,4 +1,4 @@
-package api
+package web
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"mind-sharer/domain/models"
-	"mind-sharer/persistence"
+	"mind-sharer/infrastructure/datastorage"
+	"mind-sharer/internal/domain/models"
 	"mind-sharer/usecases"
 )
 
@@ -25,7 +25,7 @@ func Main() {
 	db.AutoMigrate(&models.User{})
 
 	// Initialize the repository
-	userRepo := persistence.NewUserRepository(db)
+	userRepo := datastorage.NewUserRepository(db)
 
 	// Initialize the use case
 	userUseCase := usecases.NewUserUseCase(userRepo)

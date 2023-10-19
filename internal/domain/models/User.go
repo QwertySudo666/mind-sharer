@@ -7,5 +7,7 @@ type User struct {
 	Email    string    `json:"email"`
 	Username string    `json:"username"`
 	Password string    `json:"password"`
-	//Posts    []post    `json:"posts"`
+	//Posts    []Post    `json:"posts"`
+	//Comments    []Comment    `json:"comments"`
+	//Groups    []Group    `json:"groups"`
 }

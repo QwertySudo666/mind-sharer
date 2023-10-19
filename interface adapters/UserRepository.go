@@ -1,8 +1,8 @@
-package adapter
+package interface_adapters
 
 import (
 	"github.com/google/uuid"
-	"mind-sharer/domain/models"
+	"mind-sharer/internal/domain/models"
 )
 
 type UserRepository interface {
