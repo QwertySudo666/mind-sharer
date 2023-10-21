@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type post struct {
+type Post struct {
 	Id          uuid.UUID `json:"id,"`
 	AuthorID    uuid.UUID `json:"author_id"`
 	Title       string    `json:"title"`

@@ -4,94 +4,83 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"mind-sharer/infrastructure/datastorage"
 	"mind-sharer/internal/domain/models"
 	"mind-sharer/usecases"
 )
 
-func Main() {
-	router := gin.Default()
+type UsersHandler struct {
+	userUseCase *usecases.UserUseCase
+}
 
-	// Initialize the database connection
-	dsn := "root:localhost@tcp(127.0.0.1:3306)/mind_sharer?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+func NewUsersHandler(userUseCase *usecases.UserUseCase) *UsersHandler {
+	return &UsersHandler{userUseCase}
+}
+
+func (u *UsersHandler) FetchAllUsers(ctx *gin.Context) {
+	users, err := u.userUseCase.SearchUsers()
 	if err != nil {
-		panic("Failed to connect to database")
+		ctx.JSON(404, err)
+		return
+	}
+	ctx.IndentedJSON(200, users)
+}
+
+func (u *UsersHandler) FetchUserById(ctx *gin.Context) {
+	userID := uuid.MustParse(ctx.Param("id"))
+	user, err := u.userUseCase.GetUserByID(userID)
+	if err != nil {
+		ctx.JSON(404, gin.H{"error": "User not found"})
+		return
 	}
 
-	// Migrate the database
-	db.AutoMigrate(&models.User{})
+	ctx.JSON(200, user)
+}
 
-	// Initialize the repository
-	userRepo := datastorage.NewUserRepository(db)
+func (u *UsersHandler) CreateUser(ctx *gin.Context) {
+	var user models.User
+	if err := ctx.Bind(&user); err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid request payload"})
+		return
+	}
 
-	// Initialize the use case
-	userUseCase := usecases.NewUserUseCase(userRepo)
+	userID, err := u.userUseCase.RegisterUser(user)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to register user"})
+		return
+	}
 
-	// Define API routes
-	router.GET("api/users", func(context *gin.Context) {
-		users, err := userUseCase.SearchUsers()
-		if err != nil {
-			context.JSON(404, err)
-			return
-		}
-		context.IndentedJSON(200, users)
-	})
+	ctx.JSON(201, gin.H{"user_id": userID})
+}
 
-	router.GET("api/users/:id", func(c *gin.Context) {
-		userID := uuid.MustParse(c.Param("id"))
-		user, err := userUseCase.GetUserByID(userID)
-		if err != nil {
-			c.JSON(404, gin.H{"error": "User not found"})
-			return
-		}
+func (u *UsersHandler) UpdateUser(ctx *gin.Context) {
+	var user models.User
+	if err := ctx.Bind(&user); err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid request payload"})
+		return
+	}
 
-		c.JSON(200, user)
-	})
+	userID, err := u.userUseCase.UpdateUser(user)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to register user"})
+		return
+	}
 
-	router.POST("api/users", func(c *gin.Context) {
-		var user models.User
-		if err := c.Bind(&user); err != nil {
-			c.JSON(400, gin.H{"error": "Invalid request payload"})
-			return
-		}
+	ctx.JSON(201, gin.H{"user_id": userID})
+}
 
-		userID, err := userUseCase.RegisterUser(user)
-		if err != nil {
-			c.JSON(500, gin.H{"error": "Failed to register user"})
-			return
-		}
+func (u *UsersHandler) DeleteUserById(ctx *gin.Context) {
+	userID := uuid.MustParse(ctx.Param("id"))
+	user, err := u.userUseCase.DeleteUser(userID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	ctx.IndentedJSON(200, user)
+}
 
-		c.JSON(201, gin.H{"user_id": userID})
-	})
-
-	router.PUT("api/users", func(c *gin.Context) {
-		var user models.User
-		if err := c.Bind(&user); err != nil {
-			c.JSON(400, gin.H{"error": "Invalid request payload"})
-			return
-		}
-
-		userID, err := userUseCase.UpdateUser(user)
-		if err != nil {
-			c.JSON(500, gin.H{"error": "Failed to register user"})
-			return
-		}
-
-		c.JSON(201, gin.H{"user_id": userID})
-	})
-
-	router.DELETE("api/users/:id", func(context *gin.Context) {
-		userID := uuid.MustParse(context.Param("id"))
-		user, err := userUseCase.DeleteUser(userID)
-		if err != nil {
-			fmt.Println(err)
-		}
-		context.IndentedJSON(200, user)
-	})
-
-	// Start the server
-	router.Run(":8080")
+func (u *UsersHandler) RegisterUsersRoutes(router *gin.Engine) {
+	router.GET("api/users", u.FetchAllUsers)
+	router.GET("api/users/:id", u.FetchUserById)
+	router.POST("api/users", u.CreateUser)
+	router.PUT("api/users", u.UpdateUser)
+	router.DELETE("api/users/:id", u.DeleteUserById)
 }

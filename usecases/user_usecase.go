@@ -2,15 +2,15 @@ package usecases
 
 import (
 	"github.com/google/uuid"
-	"mind-sharer/interface adapters"
+	"mind-sharer/interface_adapters"
 	"mind-sharer/internal/domain/models"
 )
 
 type UserUseCase struct {
-	userRepo interface_adapters.UserRepository
+	userRepo interface_adapters.UsersRepository
 }
 
-func NewUserUseCase(repo interface_adapters.UserRepository) *UserUseCase {
+func NewUsersUseCase(repo interface_adapters.UsersRepository) *UserUseCase {
 	return &UserUseCase{
 		userRepo: repo,
 	}

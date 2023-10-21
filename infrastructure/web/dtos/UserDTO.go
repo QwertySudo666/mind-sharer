@@ -1,8 +1,8 @@
-package models
+package dtos
 
 import "github.com/google/uuid"
 
-type User struct {
+type UserDTO struct {
 	ID       uuid.UUID `json:"id"`
 	Email    string    `json:"email"`
 	Username string    `json:"username"`
